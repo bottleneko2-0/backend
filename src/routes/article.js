@@ -189,7 +189,7 @@ router.get('/articles/:post_code', async (req, res) => {
 	}
 })
 
-router.delete('/articles/:post_code', verifyToken, async (req, res) => {
+router.delete('/articles/:post_code', async (req, res) => {
 	const { post_code } = req.params
 
 	const deletedPost = await prisma.article.delete({
@@ -198,7 +198,7 @@ router.delete('/articles/:post_code', verifyToken, async (req, res) => {
 	res.json({ success: true, message: '文章刪除成功', deletedPost })
 })
 
-router.put('/articles/:post_code', verifyToken, async (req, res) => {
+router.put('/articles/:post_code', async (req, res) => {
   const { post_code } = req.params;
   const { title, content } = req.body;
   
