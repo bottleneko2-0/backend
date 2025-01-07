@@ -31,6 +31,7 @@ const qa = require('./src/routes/qa')
 const qaRelations = require('./src/routes/qa-relations')
 const product = require('./src/routes/product')
 const topics = require('./src/routes/topics')
+const dayCard = require('./src/routes/day-card')
 app.use(cors())
 
 // middleware
@@ -62,6 +63,7 @@ app.use(qa)
 app.use(qaRelations)
 app.use('/api', product)
 app.use('/api', topics)
+app.use('/api', dayCard)
 
 app.listen(port, () => {
 	console.log(`Server listening on port ${port}`)
