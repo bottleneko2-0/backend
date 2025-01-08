@@ -3,18 +3,16 @@ const router = express.Router()
 const fs = require('fs')
 const path = require('path')
 
-// 亂數選取陣列中的指定數量元素
+// 使用 Fisher-Yates 洗牌算法來隨機選取元素
 const getRandomElements = (array, count) => {
-	const result = []
-	const usedIndices = new Set()
-	while (result.length < count && usedIndices.size < array.length) {
-		const randomIndex = Math.floor(Math.random() * array.length)
-		if (!usedIndices.has(randomIndex)) {
-			result.push(array[randomIndex])
-			usedIndices.add(randomIndex)
-		}
-	}
-	return result
+	// 創建陣列副本以避免修改原始陣列
+	const shuffled = [...array]
+	const n = shuffled.length // Fisher-Yates 洗牌
+	for (let i = n - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1))
+		;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+	} // 返回前 count 個元素
+	return shuffled.slice(0, count)
 }
 
 router.get('/cards/random', (_req, res) => {
@@ -22,15 +20,12 @@ router.get('/cards/random', (_req, res) => {
 	const covers = []
 	const maxFiles = 5 // 限制最多隨機選取 5 個檔案
 	const maxCovers = 50 // 限制回傳最多 50 個封面
-
 	try {
 		// 列出 API_ID 中的檔案並隨機選取最多 5 個
 		const allFiles = fs
 			.readdirSync(apiIdDir)
 			.filter((file) => file !== 'series.json')
-		const selectedFiles = getRandomElements(allFiles, maxFiles)
-
-		// 選取的檔案並收集 cover 連結
+		const selectedFiles = getRandomElements(allFiles, maxFiles) // 選取的檔案並收集 cover 連結
 		for (const file of selectedFiles) {
 			if (covers.length >= maxCovers) break
 			const filePath = path.join(apiIdDir, file)
@@ -51,9 +46,7 @@ router.get('/cards/random', (_req, res) => {
 				console.error(`讀取或解析檔案 ${file} 失敗：`, err)
 				continue
 			}
-		}
-
-		// 確保最多回傳 50 個連結
+		} // 確保最多回傳 50 個連結
 		const limitedCovers = covers.slice(0, maxCovers)
 		res.status(200).json({ covers: limitedCovers })
 	} catch (err) {
