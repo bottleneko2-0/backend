@@ -198,13 +198,17 @@ router.delete('/articles/:post_code', async (req, res) => {
 	res.json({ success: true, message: '文章刪除成功', deletedPost })
 })
 
-router.put('/articles/:post_code', async (req, res) => {
+router.put('/articles/:post_code', verifyToken, async (req, res) => {
   const { post_code } = req.params;
   const { title, content } = req.body;
+	const { userId } = req.user
   
   try {
     const updatedPost = await prisma.article.update({
-      where: { post_code },
+			where: {
+				post_code,
+				user_id: userId,
+			},
       data: {
         title: title ,
         content: content ,
@@ -213,7 +217,11 @@ router.put('/articles/:post_code', async (req, res) => {
     });
     res.json(updatedPost);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+		if (error.code === 'P2025') {
+			res.status(404).json({ error: '文章不存在或無權限編輯' });
+		} else {
+			res.status(500).json({ error: error.message });
+		}
   }
 })
 

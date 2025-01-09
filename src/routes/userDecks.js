@@ -22,17 +22,23 @@ router.get('/decks', verifyToken, async (req, res) => {
 
 
 router.delete('/decks/:deck_id', verifyToken, async (req, res) => {
-  try {
-    const { deck_id } = req.params;
+  const { deck_id } = req.params;
+  const { userId } = req.user
 
+  try {
     const deletedDeck = await prisma.deck_list.delete({
-        where: { deck_id },
+      where: { 
+        deck_id,
+        user_id: userId,
+      },
     });
 
-    res.json({ success: true, message: '刪除成功', deletedDeck });
+    res.json( deletedDeck );
   } catch (error) {
     if (error.code === 'P2003') {
       res.status(400).json({ message: '已引用於文章,無法刪除' });
+    } else if (error.code === 'P2025') {
+      res.status(404).json({ message: '牌組不存在或無權限刪除' });
     } else {
       console.error('删除牌组失败:', error);
       res.status(500).json({ message: '刪除失敗'});
